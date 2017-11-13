@@ -1,0 +1,107 @@
+.none-display {
+  display: none !important;
+}
+.block-display {
+  display: block !important;
+}
+.btn-disable {
+  cursor: no-drop !important;
+  background: #EEEEEE !important;
+  border-color: #ddd !important;
+}
+.btn-disable:hover {
+  background: #EEEEEE !important;
+}
+#container-filters {
+  margin: 0px !important;
+  padding: 0px !important;
+  list-style-type: none;
+}
+#container-filters .item {
+  display: inline-block;
+  margin: 0px 5px;
+}
+#container-filters .item button {
+  background-color: #e2ff90 !important;
+  border-color: #cbdbee !important;
+  padding: 3px 8px !important;
+  color: #707070 !important;
+}
+#container-filters .item button:first-child {
+  border-top-left-radius: 3px !important;
+  border-bottom-left-radius: 3px !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right: 0 !important;
+}
+#container-filters .item button:last-child {
+  border-top-right-radius: 3px !important;
+  border-bottom-right-radius: 3px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  color: #44494e !important;
+}
+#container-filters .item button:hover {
+  background: #00a65a !important;
+  color: white !important;
+  border-color: #00a65a !important;
+}
+#table-data .paginate_table:hover {
+  background: white;
+}
+#table-data .paginate_table ul {
+  margin: 0px !important;
+  padding: 0px !important;
+  list-style-type: none;
+  display: block;
+}
+#table-data .paginate_table ul .total-row {
+  padding: 0px 20px;
+}
+#table-data .paginate_table ul li {
+  display: inline-block;
+}
+#table-data .paginate_table ul li:last-child a {
+  border-right: 1px solid #eeeeee;
+}
+#table-data .paginate_table ul li .active {
+  background: #428bca !important;
+  border: 1px solid #428bca !important;
+  color: white !important;
+}
+#table-data .paginate_table ul li .active:hover {
+  background: #428bca !important;
+}
+#table-data .paginate_table ul li .disable {
+  cursor: no-drop;
+  background: #EEEEEE;
+  border-color: #ddd;
+}
+#table-data .paginate_table ul li .disable:hover {
+  background: #EEEEEE;
+}
+#table-data .paginate_table ul li .none-event {
+  cursor: default !important;
+}
+#table-data .paginate_table ul li .first-page {
+  display: block;
+  border-right: none;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+#table-data .paginate_table ul li .last-page {
+  display: block;
+  border-right: 1px solid #eeeeee;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+#table-data .paginate_table ul li a {
+  border: 1px solid #eeeeee;
+  border-right: none;
+  display: block;
+  padding: 6px 12px;
+  color: #428bca;
+}
+#table-data .paginate_table ul li a:hover {
+  background: #e2ff90;
+}
