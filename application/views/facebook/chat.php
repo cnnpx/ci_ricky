@@ -838,6 +838,62 @@
 	-->
 </div>
 
+
+<!--reply dialog-->
+
+
+
+<div class="modal fade" id="dialog-reply" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Gửi tin nhắn</h4>
+        </div>
+        <div class="modal-body" style =" max-height: fit-content;">
+			<input type = "hidden" id = "comment-id-private-message">
+			<input type = "text"  style="height: 58px; max-height: 300px; width: 100%;" class="form-control"  row = "4" id = "quick-private-reply-box" placeholder ="Nhập tin nhắn riêng"> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+		  <button type="button" class="btn btn-default" onclick = "sendMessagePrivately()">Gửi tin nhắn</button>
+        </div>
+      </div>
+      
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="dialog-comment" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Trả lời</h4>
+        </div>
+        <div class="modal-body" style =" max-height: fit-content;">
+			<input type = "hidden" id = "comment-id-quick-reply">
+			<input type = "text"  style="height: 58px; max-height: 300px; width: 100%;" class="form-control"  id = "quick-reply-box" row = "4" placeholder ="Nhập câu trả lời"> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+		  <button type="button" class="btn btn-default" onclick = "sendQuickReply()">Gửi bình luận</button>
+        </div>
+      </div>
+      
+    </div>
+</div>
+
+
+<!-- end reply dialog -->
+
+
 <script src="assets/js/moment.min.js"></script>
 <?php $this->load->view('includes/footer'); ?>
 <!--<script src="assets/js/chat.js"></script>-->
@@ -876,10 +932,7 @@
         });
     };
 
-    $(document).ready(function(){
-       waitForMsg();
-	//initWebsocket();
-    });
+  
 
 
 
@@ -922,11 +975,13 @@ function addmsg(type, data) {
 
 
     var access_token = '<?php echo $appToken?>';
-    var userId = '';
     
-//init data
+	var userId = '';
+    
+	//init data
     $(document).ready(function() {
         $.ajaxSetup({ cache: true });
+		waitForMsg();
         $.getScript('//connect.facebook.net/en_US/sdk.js', function(){
             FB.init({
                 appId: '2020899998139436',
@@ -1031,8 +1086,7 @@ function addmsg(type, data) {
                         '<div>'+comment.from.name+'</div>' +
 						'<p class="message">' +
                         '<span>'+comment.message+'</span>' +
-						'<div><span><button style = "border:none" class = "fa fa-thumbs-o-up" onclick="reactionComment(\''+comment.id +'\')"  ></button></span></div>' +
-						
+						'<div><span><button title="Thích" style = "border:none" class = "fa fa-thumbs-o-up" onclick="reactionComment(\''+comment.id +'\')"  ></button><button title="Ẩn comment" style = "border:none" class = "fa fa-eye-slash" onclick="hideComment(\''+comment.id +'\')"  ></button><button  title="Gửi tin nhắn nhanh" data-toggle="modal" data-target="#dialog-reply" style = "border:none" class = "fa fa-commenting-o" onclick="sendPrivateReply(\''+comment.id +'\')"  ></button><button  title="Trả lời" data-toggle="modal" data-target="#dialog-comment" style = "border:none" class = "fa fa-commenting-o" onclick="createTextboxQuickReply(\''+comment.id +'\')"  ></button><a title="Xem trên facebook" class = "fa fa-facebook-square"  href="https://facebook.com/'+comment.id+'" target ="_blank"></a></span></div>' +
                         '</p>' +
                         '</div></li>';
 						}
@@ -1055,7 +1109,7 @@ function addmsg(type, data) {
     //action send post data to api
     $('#send-button').click(function(){
 		 var id = $('#private-id-message').val();
-		   var datapost = $('#textarea-auto-height-harapage').val();
+		 var datapost = $('#textarea-auto-height-harapage').val();
         if(datapost== null || datapost == undefined || datapost.trim()==''){
             return;
         }else{
@@ -1065,7 +1119,7 @@ function addmsg(type, data) {
                 sendMessage(datapost);
             }else{
             // reply a message, post private message to user
-                (datapost);
+                replyACommnent(id,datapost);
             }
 
             //clear input text
@@ -1093,11 +1147,10 @@ function addmsg(type, data) {
 		bindConversationData(id);
     }
 
-function replyACommnent(messageReply){
-    var id = $('#private-id-message').val();
-    console.log(id);
+function replyACommnent(idComment,messageReply){
+   
     FB.api(
-        "/"+id+"/comments",
+        "/"+idComment+"/comments",
         "POST",
         {
             message: messageReply,
@@ -1106,10 +1159,10 @@ function replyACommnent(messageReply){
         function (response) {
             console.log(response);
             if (response && !response.error) {
-                console.log(response);
+              alertify.success('Đã trả lời bình luận này');
             }else{
                 //gui tin nhan ko thnah cong
-                alert('Tin nhăn gửi không thành công.');
+              alertify.error('Trả lời gửi không thành công.');
 
             }
         }
@@ -1118,7 +1171,7 @@ function replyACommnent(messageReply){
 	
 	//Get access_token
         function getAccessToken(){
-           if( FB.getAccessToken() ==null||FB.getAccessToken() ==undefined || FB.getAccessToken() == '' ){
+           if( FB.getAccessToken() ==null||FB.getAccessToken() ==undefined || FB.getAccessToken().trim() == '' ){
                FB.login(function(response){
                    //console.log(response);
                    userToken  = FB.getAccessToken();
@@ -1371,7 +1424,7 @@ function replyACommnent(messageReply){
                  if(!response.error && response.success==true){
                      alertify.success('Đã thể hiện cảm xúc với comment trên');
                  }else{
-					  alertify.error('Không thể biểu lộ cảm xúc  với comment này');
+					  alertify.error('Không thể biểu lộ cảm xúc với comment này');
                  }
                 }
             );
@@ -1419,6 +1472,36 @@ function replyACommnent(messageReply){
 			
 		}
 		
+		
+		function sendPrivateReply(commentId){
+			$('#comment-id-private-message').val(commentId);
+			//$('#dialog-reply').modal().show();
+		}
+		
+		function createTextboxQuickReply(commentId){
+			$('#comment-id-quick-reply').val(commentId);
+			}
+		
+		function sendMessagePrivately(){
+			var commentId =  $('#comment-id-private-message').val();
+			var message  = $('#quick-private-reply-box').val();
+			if(message==null || message== undefined || message.trim()==''){
+				alertify.error('Chưa nhập nội dung trước khi gửi');
+			}else{
+				privateReply(commentId,message);
+			}
+		}
+		
+		
+		function sendQuickReply(){
+			var commentId =  $('#comment-id-quick-reply').val();
+			var message = $('#quick-reply-box').val();	
+			if(message==null || message== undefined || message.trim()==''){
+				alertify.error('Chưa nhập nội dung trước khi gửi');
+			}else{
+				replyACommnent(commentId,message);
+			}
+		}
 		
 		
 		
