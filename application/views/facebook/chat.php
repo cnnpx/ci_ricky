@@ -621,7 +621,7 @@
                                                 </div>
                                                 <div class="list-message" style="display: none">
                                                     <div class="list-message-fix-height">
-                                                        <div  class="list-message-container" >
+                                                        <div  class="list-message-container" style="overflow-y: scroll; max-height: 99vh;">
                                                             <ul id = "conversation-message-picture">
                                                                 <li  class="conversation-message-picture hidden">
                                                                     <p class="text-no-bold"></p>
@@ -643,13 +643,13 @@
                                                     </div>
                                                     <div class="message-reply border-top clearfix">
                                                         <div class="textarea-reply">
-                                                            <textarea id="textarea-auto-height-harapage" style="height: 58px; max-height: 300px; width: 100%;" class="form-control" placeholder="Nhập câu trả lời">
-<span class = "fa fa-smile"></span>															
-															</textarea>
-                                                        </div>
+                                                            <textarea id="textarea-auto-height-harapage" style="height: 58px; max-height: 300px; width: 100%;" class="form-control" placeholder="Nhập câu trả lời">		</textarea>
+															
+														</div>
                                                         <div class="reply-attachment-form">
                                                             <div class="item">
                                                                 <div>
+																	<div class = "fa fa-smile-o"></div> 
                                                                     <div class="p-none-important btn-group drop-select-search drop-control dropup" style="position: relative;">
                                                                         <div id="ga_harapage_6" data-toggle="dropdown" role="button">
                                                                             <i class="fa fa-product"></i>
@@ -660,9 +660,7 @@
                                                             </div>
                                                             <div class="item">
                                                                 <div id="ga_harapage_7" data-bind="click: ClickOpenAddImageModal">
-                                                                    <i class="fa fa-camera"></i>
-
-
+                                                      <i class="fa fa-camera"></i>
                                                                 </div>
                                                             </div>
                                                             <div class="item" style="position: relative;">
@@ -945,33 +943,7 @@ function addmsg(type, data) {
         return;
     }
 
-//        var dataReceive  ='<li class="border-bottom is-unreaded"  onclick = "displayBox(\''+data.id+'\')">'+
-//        '<div class="conversation-icon">'+
-//        '<img src="'+event.from.picture.data.url+'">'+
-//        '</div>'+
-//        '<div class="conversation-content">'+
-//        '<p class="text-no-bold conversation-snippet">'+event.from.name+'</p>'+
-//        '<div class="conversation-snippet">'+
-//        '<span>'+event.message+'</span>'+
-//        '</div>'+
-//        '</div>'+
-//        '<div class="conversation-info">'+
-//        '<div>'+
-//        '<i class="fa fa-clock-o"></i>'+
-//        '<span>'+event.created_time+'</span>'+
-//        '</div>'+
-//        '<div class="user-in-obj">'+
-//        '<ul class="letter-avatar"></ul>'+
-//        '</div>'+
-//        '<div>'+
-//        '<i class="type-icon fa fa-envelope-o fa-1-5"></i>'+
-//        '</div>'+
-//        '<div>'+
-//        '<a class="read-status inline_block_i is-unreaded"></a>'+
-//        '</div>'+
-//        '</div>'+
-//        '</li>';
-//        $('#list-conversation').prepend(dataReceive);
+
     };
 
 
@@ -1139,12 +1111,16 @@ function addmsg(type, data) {
                 access_token: pageAccessToken},
             function (response) {
                 console.log(response);
+				bindConversationData(id);
                 if (response && !response.error) {
                     console.log(response);
-                }
+					bindConversationData(id);
+                }else{
+
+				}
             }
         );
-		bindConversationData(id);
+		
     }
 
 function replyACommnent(idComment,messageReply){
@@ -1314,9 +1290,16 @@ function replyACommnent(idComment,messageReply){
 
                         $('#conversation-message-picture').html('');
                         $('#conversation-message-picture').html(htmlMessage);
+						var lastmessage = $('#conversation-message-picture');
+					
+
                         $('#message-type').val('message');
                         $('#private-id-message').val(idConversation);
                         $('.list-message').show();
+						//scroll xuong cuoi trang chat
+						var wtf    = $(".list-message-container");
+						var height = wtf[0].scrollHeight;
+						$(".list-message-container").scrollTop(height);
                     }else{
                         dataJson = {error: 'Không lấy được danh sách tin nhắn'};
                     }
