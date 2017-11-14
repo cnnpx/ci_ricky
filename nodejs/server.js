@@ -55,7 +55,7 @@ app.post('/webhook', (req, res) => {
 			
 	}
 	//thông tin comment nhận đc từ webhook
-  if(data.entry[0].changes && data.entry[0].changes.field == 'feed' && data.entry[0].changes.value !=null && data.entry[0].changes.value !=undefined && data.entry[0].changes.value.item =='comment'){
+  if(data.entry[0].changes && data.entry[0].changes[0].field == 'feed' && data.entry[0].changes[0].value !=null && data.entry[0].changes[0].value !=undefined && data.entry[0].changes[0].value.item =='comment'){
 	  insertComment(data.entry[0]);
 	  proxyEmitter.emit('msg', data.entry[0]);
 	  res.sendStatus(200);
@@ -63,7 +63,7 @@ app.post('/webhook', (req, res) => {
   }
   
   //Thay đổi trong cuộc hội thoại `conversations` đc fb thông báo khi có tin nhắn mới gửi đến
-   if(data.entry[0].changes[0] && data.entry[0].changes[0].field == 'conversations' && data.entry[0].changes[0].value !=null && data.entry[0].changes[0].value !=undefined && data.entry[0].changes[0].value.thread_id  ){
+   if(data.entry[0].changes && data.entry[0].changes[0].field == 'conversations' && data.entry[0].changes[0].value !=null && data.entry[0].changes[0].value !=undefined && data.entry[0].changes[0].value.thread_id  ){
 	   
 	   //Kiem tra xem cuoc hoi thoai da dc thiet lap tu truoc do hay chua de quyet dinh co insert hay update thong tin conversation hay ko
 	  checkConversation(data );
@@ -105,7 +105,7 @@ app.get('/eventsource', (req, res) => {
 app.all('/*', (req, res) => {
   res.json({
     status: 404,
-    message: `No endpoint exists at ${req.originalUrl}`
+    message: `Không tồn tại đường dẫn ${req.originalUrl}`
   });
 });
 
@@ -157,23 +157,24 @@ var con = mysql.createConnection({
 	con.connect(function(err) {
   if (err) return false;
   var dataInsert = [
-	data.changes[0].comment_id,
-	data.changes[0].parent_id, 
+	data.changes[0].value.comment_id,
+	data.changes[0].value.parent_id, 
 	0,
 	false, 
 	true, 
-	data.changes[0].message, 
-	data.changes[0].sender_id, 
+	data.changes[0].value.message, 
+	data.changes[0].value.sender_id, 
 	data.id, 
-	data.changes[0].item, 
+	data.changes[0].value.item, 
 	data.time,
-	data.changes[0].post_id,
-	data.changes[0].post_id
+	data.changes[0].value.post_id,
+	data.changes[0].value.post_id
 	];
+	console.log(dataInsert);
 	var sql = "INSERT INTO comments(id, id_parent, message_count, is_hidden, can_reply, message, from_sender, to_sender, name, create_date, link,post_id) values ( ? )";
   con.query(sql, [dataInsert], function (err, result) {
     if (err) {
-		console.log('insert comment failed')
+		console.log('insert comment failed '+ err)
 		return false;
 	}
     console.log("insert Comment Success");

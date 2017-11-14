@@ -643,7 +643,9 @@
                                                     </div>
                                                     <div class="message-reply border-top clearfix">
                                                         <div class="textarea-reply">
-                                                            <textarea id="textarea-auto-height-harapage" style="height: 58px; max-height: 300px; width: 100%;" class="form-control" placeholder="Nhập câu trả lời"></textarea>
+                                                            <textarea id="textarea-auto-height-harapage" style="height: 58px; max-height: 300px; width: 100%;" class="form-control" placeholder="Nhập câu trả lời">
+<span class = "fa fa-smile"></span>															
+															</textarea>
                                                         </div>
                                                         <div class="reply-attachment-form">
                                                             <div class="item">
@@ -1090,9 +1092,7 @@ function addmsg(type, data) {
                         '</p>' +
                         '</div></li>';
 						}
-						
 					}
-					
 					var htmlMessage = 
                         '<div style= "background: cornsilk, padding-bottom: 30px;"> ' +
                         '<p>' +
