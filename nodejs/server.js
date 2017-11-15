@@ -1,15 +1,35 @@
 /* eslint-env node */
 /* eslint-disable no-console */
 'use strict';
-
-
 const EventEmitter = require('events');
 const express = require('express');
 const bodyParser = require('express/node_modules/body-parser');
 var mysql = require('./mysql');
 var net = require('net');
 const app = express();
+var server = require('websocket').server;
+var http = require('http');
 
+var socket = new server({
+    httpServer: http.createServer().listen(1337)
+});
+
+
+socket.on('request', function(request) {
+    var connection = request.accept(null, request.origin);
+
+    connection.on('message', function(message) {
+        console.log(message.utf8Data);
+       
+        setTimeout(function() {
+            
+        }, 1000);
+    });
+
+    connection.on('close', function(connection) {
+        console.log('connection closed');
+    });
+});
 
 
 
@@ -52,7 +72,6 @@ app.post('/webhook', (req, res) => {
 		proxyEmitter.emit('msg', data.entry[0]);		
 		res.sendStatus(200);
 		return;
-			
 	}
 	//thông tin comment nhận đc từ webhook
   if(data.entry[0].changes && data.entry[0].changes[0].field == 'feed' && data.entry[0].changes[0].value !=null && data.entry[0].changes[0].value !=undefined && data.entry[0].changes[0].value.item =='comment'){
@@ -95,7 +114,6 @@ app.get('/eventsource', (req, res) => {
     res.write(`${JSON.stringify(data)}`);
   });
 
-  // console.log(res.socket);
 
   res.socket.on('close', () => {
     console.log('Client has left');
@@ -312,6 +330,3 @@ con.connect(function(err) {
 	
 	
 app.listen(5000);
-
-
-

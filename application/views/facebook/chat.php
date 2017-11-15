@@ -905,7 +905,7 @@
     var pageAccessToken='';
     var userToken = "";
     var pageId = '<?php echo $pageId?>';
-
+	var userLogin = "";
 
 
   function waitForMsg(){
@@ -943,7 +943,6 @@ function addmsg(type, data) {
         return;
     }
 
-
     };
 
 
@@ -955,7 +954,8 @@ function addmsg(type, data) {
 	//init data
     $(document).ready(function() {
         $.ajaxSetup({ cache: true });
-		waitForMsg();
+		//waitForMsg();
+		initWebsocket();
         $.getScript('//connect.facebook.net/en_US/sdk.js', function(){
             FB.init({
                 appId: '2020899998139436',
@@ -1004,7 +1004,6 @@ function addmsg(type, data) {
                     $('#list-conversation').html(listConversationHtml);
                 }
             );
-
         });
 
         $('.fb-chat-list .conversation .tab-content:not(:first-child)').hide();
@@ -1152,14 +1151,22 @@ function replyACommnent(idComment,messageReply){
                    //console.log(response);
                    userToken  = FB.getAccessToken();
                    userId = FB.getUserID();
+				   FB.api('/me?access_token='+userToken+'&fields=name,picture,id',function(responseResult){
+					   if(!responseResult.error){
+					   userLogin=responseResult;
+					   }
+					   });
+				   
                    FB.api(
                        '/'+pageId,
                        'GET',
                        {'fields':'access_token',
                            'access_token': userToken},
                        function(response) {
-                           console.log(response);
-                           pageAccessToken = response.access_token;
+                          // console.log(response);
+                           if(!response.error){
+						   pageAccessToken = response.access_token;
+						   }
                        }
                    );
                });
@@ -1308,20 +1315,15 @@ function replyACommnent(idComment,messageReply){
         }
 
 		
-		function initWebsocket()
-         {
+		function initWebsocket(){
             if ("WebSocket" in window)
             {
                console.log("browser support web socket");
-               
                // Let us open a web socket
-               var ws = new WebSocket("ws://localhost:5000/eventsource");
+               var ws = new WebSocket("ws://localhost:1337");
 				
-               ws.onopen = function()
-               {
-                  // Web Socket is connected, send data using send()
-                //  ws.send("Message to send");
-                //  alert("Message is sent...");
+               ws.onopen = function(){
+				console.log('create socket connection');
                };
 				
                ws.onmessage = function (evt) 
@@ -1345,8 +1347,7 @@ function replyACommnent(idComment,messageReply){
                };
             }
             
-            else
-            {
+            else{
                // The browser doesn't support WebSocket
                alertify.error("Trình duyệt không hỗ trợ tính năng cập nhật trạng thái thời gian thực, vui lòng thử lại với trình duyệt khác!",100);
             }
@@ -1418,7 +1419,7 @@ function replyACommnent(idComment,messageReply){
 		//lay thong tin chi tiet thay doi cua tin nhan
 		function getDetailMessageChange(messageId){
 			FB.api(
-                messageId,
+                'm_'+messageId,
                 'GET',
 					{
 					'fields': 'message,id,created_time,from{id,picture,name},to{id,picture,name}',
@@ -1446,7 +1447,7 @@ function replyACommnent(idComment,messageReply){
                     },
                 function(response) {
                  if(!response.error && response.success==true){
-                    appendNewMessage(response);
+                    appendNewComment(response);
                  }else{
 					//console.log('ko lấy được thông tin message mới');
                  }
