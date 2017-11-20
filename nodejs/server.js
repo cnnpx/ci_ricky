@@ -5,22 +5,46 @@ const EventEmitter = require('events');
 const express = require('express');
 const bodyParser = require('express/node_modules/body-parser');
 var mysql = require('./mysql');
-var net = require('net');
+
 const app = express();
 var server = require('websocket').server;
 var http = require('http');
 
-var socket = new server({
-    httpServer: http.createServer().listen(1337)
+//---------------------------
+var WebSocketServer = require("ws").Server;
+
+var wss = new WebSocketServer({port:1338});
+
+wss.on('connection', function connection(eventSource) {
+    eventSource.on('message', function(message) {
+      //nhan message tu client
+	  console.log(message);
+	  
+	  
+    });
+
 });
 
+//broadcast message nhan dc tu facebook den tat ca client dang connect den websocket
+wss.broadcast = function broadcast(msg) {
+   wss.clients.forEach(function each(client) {
+       client.send(JSON.stringify(msg));
+    });
+};
 
+//---------------------------
+
+
+/*
+var socket = new server({
+    httpServer: http.createServer().listen(1338)
+});
 socket.on('request', function(request) {
     var connection = request.accept(null, request.origin);
 
     connection.on('message', function(message) {
         console.log(message.utf8Data);
-       
+		connection.sendUTF(message);
         setTimeout(function() {
             
         }, 1000);
@@ -31,13 +55,14 @@ socket.on('request', function(request) {
     });
 });
 
-
+*/
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}))
 
 // parse application/json
 app.use(bodyParser.json())
+
 
 app.set('ip', process.env.OPENSHIFT_NODEJS_IP || process.env.IP || "127.0.0.1");
 
@@ -57,9 +82,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-class SSE extends EventEmitter {}//server sent event
-const proxyEmitter = new SSE();
-proxyEmitter.setMaxListeners(10);
+
 
 app.post('/webhook', (req, res) => {
   const data = req.body;
@@ -69,14 +92,15 @@ app.post('/webhook', (req, res) => {
    //thong tin tin nhan nhan dc tu webhook
 	if(data.entry[0].messaging && data.entry[0].messaging[0].message){
 		insertMessage(data.entry[0]);
-		proxyEmitter.emit('msg', data.entry[0]);		
+		wss.broadcast( data.entry[0]);
 		res.sendStatus(200);
 		return;
 	}
 	//thông tin comment nhận đc từ webhook
   if(data.entry[0].changes && data.entry[0].changes[0].field == 'feed' && data.entry[0].changes[0].value !=null && data.entry[0].changes[0].value !=undefined && data.entry[0].changes[0].value.item =='comment'){
 	  insertComment(data.entry[0]);
-	  proxyEmitter.emit('msg', data.entry[0]);
+	
+	  wss.broadcast(data.entry[0] );
 	  res.sendStatus(200);
 	  return;
   }
@@ -86,7 +110,8 @@ app.post('/webhook', (req, res) => {
 	   
 	   //Kiem tra xem cuoc hoi thoai da dc thiet lap tu truoc do hay chua de quyet dinh co insert hay update thong tin conversation hay ko
 	  checkConversation(data );
-	  proxyEmitter.emit('msg', data.entry[0]);
+	
+	  wss.broadcast(data.entry[0] );
 	  res.sendStatus(200);
 	  return;
   }
@@ -95,30 +120,7 @@ app.post('/webhook', (req, res) => {
   }
 });
 
-// forward messages down to subscribed clients
-app.get('/eventsource', (req, res) => {
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control':'no-cache',
-    Connection: 'keep-alive'
-  });
 
-  console.log('Client connected to eventsource');
-
-  setInterval(() => {
-   res.write('WAITING\n');
-  }, 1000);
-
-
-  proxyEmitter.on('msg', data => {
-    res.write(`${JSON.stringify(data)}`);
-  });
-
-
-  res.socket.on('close', () => {
-    console.log('Client has left');
-  });
-});
 
 app.all('/*', (req, res) => {
   res.json({
@@ -128,10 +130,6 @@ app.all('/*', (req, res) => {
 });
 
 
-app.get('/ci_ricky/chat', (req, res) => {
-  console.log('request to xampp');
-  onRequest(req, res);
-});
 
 //insert khi co tin nhan gui den page
 function insertMessage(data){
@@ -200,7 +198,6 @@ var con = mysql.createConnection({
 });
 	
 }
-
 
 
 //insert thay doi tren conversations khi co thay doi tren page

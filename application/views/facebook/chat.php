@@ -1,11 +1,16 @@
+
 <!DOCTYPE html>
+
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="Access-Control-Allow-Origin" content="http://127.0.0.1:5000/eventsource">
+    
+    <header name = "Access-Control-Allow-Origin" value = "http://127.0.0.1:5000/eventsource" />
+	
     <title>Page</title>
-    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css"/>
     <!--    <link rel="stylesheet" href="assets/vendor/plugins/pnotify/pnotify.custom.css"/>-->
     <link rel="stylesheet" href="assets/vendor/plugins/select2/select2.min.css"/>
     <link rel="stylesheet" href="assets/vendor/plugins/iCheck/all.css">
@@ -14,7 +19,7 @@
     <link rel="stylesheet" href="assets/vendor/plugins/pace/pace.min.css">
     <link rel="stylesheet" href="assets/vendor/dist/css/style.css">
     <link rel="stylesheet" href="assets/facebookresource/css.css">
-	<link rel="stylesheet" href="assets/facebookresource/alertify.min.css">
+	<link rel="stylesheet" href="assets/facebookresource/alertify.min.css"/>
    
    <script type ="text/javascript" src="assets/facebookresource/alertify.min.js"></script>
 
@@ -906,47 +911,10 @@
     var userToken = "";
     var pageId = '<?php echo $pageId?>';
 	var userLogin = "";
-
-
-  function waitForMsg(){
-      
-        $.ajax({
-            type: "GET",
-            url: "http://localhost:5000/eventsource",
-            async: true, 
-            cache: false,
-            timeout:50000,
-            success: function(data){
-                addmsg("new", data); 
-                setTimeout(
-                    waitForMsg, 
-                    1000 
-                );
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown){
-                console.log(textStatus +' - '+  errorThrown)
-				setTimeout(
-                    waitForMsg, 
-                    15000); 
-            }
-        });
-    };
-
-  
-
-
-
-function addmsg(type, data) {
-    console.log(type);
-    console.log(data);
-    if(data ==null || data == undefined){
-        return;
-    }
-
-    };
-
-
-
+	var ws;
+	
+	
+	
     var access_token = '<?php echo $appToken?>';
     
 	var userId = '';
@@ -954,8 +922,8 @@ function addmsg(type, data) {
 	//init data
     $(document).ready(function() {
         $.ajaxSetup({ cache: true });
-		//waitForMsg();
 		initWebsocket();
+		
         $.getScript('//connect.facebook.net/en_US/sdk.js', function(){
             FB.init({
                 appId: '2020899998139436',
@@ -1122,27 +1090,27 @@ function addmsg(type, data) {
 		
     }
 
-function replyACommnent(idComment,messageReply){
-   
-    FB.api(
-        "/"+idComment+"/comments",
-        "POST",
-        {
-            message: messageReply,
-            access_token: pageAccessToken
-        },
-        function (response) {
-            console.log(response);
-            if (response && !response.error) {
-              alertify.success('Đã trả lời bình luận này');
-            }else{
-                //gui tin nhan ko thnah cong
-              alertify.error('Trả lời gửi không thành công.');
+	function replyACommnent(idComment,messageReply){
+	   
+		FB.api(
+			"/"+idComment+"/comments",
+			"POST",
+			{
+				message: messageReply,
+				access_token: pageAccessToken
+			},
+			function (response) {
+				console.log(response);
+				if (response && !response.error) {
+				  alertify.success('Đã trả lời bình luận này');
+				}else{
+					//gui tin nhan ko thnah cong
+				  alertify.error('Trả lời gửi không thành công.');
 
-            }
-        }
-    );
-}
+				}
+			}
+		);
+	}
 	
 	//Get access_token
         function getAccessToken(){
@@ -1206,7 +1174,7 @@ function replyACommnent(idComment,messageReply){
 
             var listFeed = data;
             for(var i = 0; i< listFeed.conversations.data.length;i++){
-                listConversationHtml+= '<li class="border-bottom is-unreaded"  onclick = "displayConversation(\''+listFeed.conversations.data[i].id+'\',\''+listFeed.conversations.data[i].senders.data[0].name +'\',\'' +listFeed.conversations.data[i].senders.data[0].id+'\')">'+
+                listConversationHtml+= '<li id = "'+listFeed.conversations.data[i].id+'"  class="border-bottom is-unreaded"  onclick = "displayConversation(\''+listFeed.conversations.data[i].id+'\',\''+listFeed.conversations.data[i].senders.data[0].name +'\',\'' +listFeed.conversations.data[i].senders.data[0].id+'\')">'+
                     '<div class="conversation-icon">'+
                     '<img src="https://graph.facebook.com/' +listFeed.conversations.data[i].senders.data[0].id+ '/picture?type=square">'+
                     '</div>'+
@@ -1298,8 +1266,6 @@ function replyACommnent(idComment,messageReply){
                         $('#conversation-message-picture').html('');
                         $('#conversation-message-picture').html(htmlMessage);
 						var lastmessage = $('#conversation-message-picture');
-					
-
                         $('#message-type').val('message');
                         $('#private-id-message').val(idConversation);
                         $('.list-message').show();
@@ -1320,7 +1286,7 @@ function replyACommnent(idComment,messageReply){
             {
                console.log("browser support web socket");
                // Let us open a web socket
-               var ws = new WebSocket("ws://localhost:1337");
+			   ws = new WebSocket("ws://localhost:1338");
 				
                ws.onopen = function(){
 				console.log('create socket connection');
@@ -1328,8 +1294,22 @@ function replyACommnent(idComment,messageReply){
 				
                ws.onmessage = function (evt) 
                { 
-                  var received_msg = evt.data;
+                 var received_msg = evt.data;
                  console.log("receive message from websocket :" + JSON.stringify(received_msg))
+				 var changes  = JSON.parse(received_msg);
+				 //tin nhan den page
+				 if(changes.messaging && changes.messaging[0].message){
+					getDetailMessageChange(changes.messaging[0].message.mid); 
+				 }
+				 
+				 //thay doi tren conversation 
+				  if(changes.changes && changes.changes[0].field == 'conversations' && changes.changes[0].value !=null && changes.changes[0].value !=undefined && changes.changes[0].value.thread_id  ){
+					  //reload lai danh sach tin nhan
+					  getListMessage();
+				  }
+				 
+				 
+				 
                };
 				ws.onerror = function (evt) 
                { 
@@ -1343,7 +1323,7 @@ function replyACommnent(idComment,messageReply){
                };
 					
                window.onbeforeunload = function(event) {
-                  socket.close();
+                  ws.close();
                };
             }
             
@@ -1415,6 +1395,7 @@ function replyACommnent(idComment,messageReply){
 		}
 		
 		
+
 		
 		//lay thong tin chi tiet thay doi cua tin nhan
 		function getDetailMessageChange(messageId){
@@ -1427,7 +1408,7 @@ function replyACommnent(idComment,messageReply){
                     },
                 function(response) {
                  if(!response.error && response.success==true){
-                    appendNewMessage(response);
+                    console.log(response);
                  }else{
 					//console.log('ko lấy được thông tin message mới');
                  }
